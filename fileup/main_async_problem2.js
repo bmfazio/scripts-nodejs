@@ -6,28 +6,35 @@ const rootdir = process.argv[2];    // Input: directorio a escanear
 // Proceso1: escanear todos los subdirectorios e identificar archivos en cada nivel
   // Funcion que recibe directorio y retorna lista con [ lista de subdirs, lista de archivos ]
 const listDir = (dirname) => {
-  readres = fs.readdirSync(dirname);
-  var arrayFile   = new Array();
-  var arrayFolder = new Array();
+  fs.readdir(
+    dirname,
+    (err, readres) => {
+      if(err) throw err;
 
-  for (var i = 0; i < readres.length; i++) {
-    var tmpExamine = fs.lstatSync(dirname+'/'+readres[i]);
-    if(tmpExamine.isFile()) arrayFile.push(readres[i]);
-    if(tmpExamine.isDirectory()) arrayFolder.push(readres[i]);
-  }
+      var arrayFile   = new Array();
+      var arrayFolder = new Array();
 
-  return(iterateDir([arrayFolder, arrayFile], dirname));
+      for (var i = 0; i < readres.length; i++) {
+        var tmpExamine = fs.lstatSync(dirname+'/'+readres[i]);
+        if(tmpExamine.isFile()) arrayFile.push(readres[i]);
+        if(tmpExamine.isDirectory()) arrayFolder.push(readres[i]);
+      }
+
+      iterateDir([arrayFolder, arrayFile]);
+    }
+  )
 }
 
-const iterateDir = (listArray, dirname) => {
-  var dirArray = new Array(listArray[0], listArray[1], []);
+async function iterateDir(listArray) {
+  var dirArray = new Array([listArray[0], listArray[1], ['']]);
+
+console.log(dirArray);
 
   for (var i = 0; i < listArray[0].length; i++) {
-    var subList = listDir(dirname+'/'+listArray[0][i]);
+    var subList = await listDir(listArray[0][i]);
     dirArray[2].push(subList);
   }
 
-  console.log(dirname,'\n-----\n',dirArray,'\n--*--\n');
   return(dirArray);
 }
 
